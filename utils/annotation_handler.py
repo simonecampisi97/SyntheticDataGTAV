@@ -30,5 +30,5 @@ if __name__ == "__main__":
     for i, row in tqdm.tqdm(enumerate(df.iterrows())):
         ann.append(row[1][JTA_dataset_cols].tolist())
 
-    with open("seq_8.json", "w") as f:
+    with open("../data/seq_8/seq_8.json", "w") as f:
         json.dump(ann, f)

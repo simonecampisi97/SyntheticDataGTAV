@@ -31,7 +31,7 @@ if __name__ == "__main__":
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     fps_video = 20
 
-    out_video = cv2.VideoWriter(os.path.join(seq_path,"seq_8.mp4"), fourcc, fps_video, (width, height))
+    out_video = cv2.VideoWriter(os.path.join(seq_path, "seq_8.mp4"), fourcc, fps_video, (width, height))
     seq_path = get_file_folder_list(seq_path)
 
     for path in seq_path:
@@ -51,5 +51,3 @@ if __name__ == "__main__":
 
     out_video.release()
     cv2.destroyAllWindows()
-
-

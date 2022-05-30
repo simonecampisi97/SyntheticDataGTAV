@@ -13,6 +13,7 @@ from path import Path
 
 from joint import Joint
 from pose import Pose
+import cv2
 
 MAX_COLORS = 42
 
@@ -90,14 +91,18 @@ def main(in_mp4_file_path, json_file_path, out_mp4_file_path, hide):
             color = colors[int(p_id) % len(colors)]
 
             # draw pose on image
-            image = pose.draw(image=image, color=color)
+            #image = pose.draw(image=image, color=color)
+
+            bbox = np.array(pose.bbox_2d_padded).astype(int)
+            image = cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), color, 2)
+
 
         writer.append_data(np.vstack([image, image[-8:, :]]))
-        print(f'\r▸ progress: {100 * (frame_number / 899):6.2f}%', end='')
+        print(f'\r▸ progress: {100 * (frame_number / 1800):6.2f}%', end='')
 
     writer.close()
     print(f'\n▸ video with annotations: \'{out_mp4_file_path.abspath()}\'\n')
 
 
 if __name__ == '__main__':
-    main("data/seq_8/seq_8.mp4", "data/seq_8/seq_8.json", "res.mp4", True)
+    main("data/seq_8/seq_8.mp4", "data/seq_8/seq_8.json", "res_bbox.mp4", True)

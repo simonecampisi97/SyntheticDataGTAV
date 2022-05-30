@@ -24,30 +24,27 @@ def get_file_folder_list(video_folder):
 
 if __name__ == "__main__":
 
-    seq_path = "C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_8"
+    for i in range(14):
 
-    width = 1920
-    height = 1080
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-    fps_video = 20
+        seq_path = f"C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_{i}"
 
-    out_video = cv2.VideoWriter(os.path.join(seq_path, "seq_8.mp4"), fourcc, fps_video, (width, height))
-    seq_path = get_file_folder_list(seq_path)
+        width = 1920
+        height = 1080
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        fps_video = 20
 
-    for path in seq_path:
+        out_video = cv2.VideoWriter(os.path.join(seq_path, f"seq_{i}.mp4"), fourcc, fps_video, (width, height))
+        seq_path = get_file_folder_list(seq_path)
 
-        frame = cv2.imread(path)
+        for path in seq_path:
 
-        out_video.write(frame)
+            frame = cv2.imread(path)
+            out_video.write(frame)
 
-        cv2.imshow("Display_Image", frame)
+            cv2.imshow("Display_Image", frame)
 
-        # cv2.imshow("Display_Image", frame2)
-        # cv2.imshow("Display_Image", frame3)
-        # cv2.imshow("Display_Image", frame2)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    out_video.release()
-    cv2.destroyAllWindows()
+        out_video.release()
+        cv2.destroyAllWindows()

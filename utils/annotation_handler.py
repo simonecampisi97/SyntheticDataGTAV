@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import tqdm, json
 
@@ -23,12 +25,16 @@ JTA_dataset_cols = ['frame', 'pedestrian_id', 'joint_type', '2D_x', '2D_y', '3D_
 
 if __name__ == "__main__":
 
-    df = pd.read_csv("../data/seq_8/coords.csv")
+    # Conversation to JTA DATASET JASON
 
-    ann = []
+    for i in range(14):
+        seq_path = f"C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_{i}"
+        df = pd.read_csv(os.path.join(seq_path, "coords.csv"))
 
-    for i, row in tqdm.tqdm(enumerate(df.iterrows())):
-        ann.append(row[1][JTA_dataset_cols].tolist())
+        ann = []
 
-    with open("../data/seq_8/seq_8.json", "w") as f:
-        json.dump(ann, f)
+        for i, row in tqdm.tqdm(enumerate(df.iterrows())):
+            ann.append(row[1][JTA_dataset_cols].tolist())
+
+        with open(os.path.join(seq_path, "seq_8.json"), "w") as f:
+            json.dump(ann, f)

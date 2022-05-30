@@ -27,8 +27,10 @@ if __name__ == "__main__":
 
     # Conversation to JTA DATASET JASON
 
-    for i in range(14):
-        seq_path = f"C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_{i}"
+    for j in range(2, 14):
+        seq_path = f"C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_{j}"
+
+        print(seq_path)
         df = pd.read_csv(os.path.join(seq_path, "coords.csv"))
 
         ann = []
@@ -36,5 +38,5 @@ if __name__ == "__main__":
         for i, row in tqdm.tqdm(enumerate(df.iterrows())):
             ann.append(row[1][JTA_dataset_cols].tolist())
 
-        with open(os.path.join(seq_path, "seq_8.json"), "w") as f:
+        with open(os.path.join(seq_path, f"seq_{j}.json"), "w") as f:
             json.dump(ann, f)

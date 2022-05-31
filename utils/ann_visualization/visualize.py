@@ -2,6 +2,7 @@
 # ---------------------
 
 import json
+import os
 import sys
 from typing import *
 
@@ -55,7 +56,7 @@ H4 = 'if `hide` the annotations of people completely occluded by objects will no
 # @click.option('--json_file_path', type=click.Path(exists=True), prompt='Enter \'json_file_path\'', help=H2)
 # @click.option('--out_mp4_file_path', type=click.Path(), prompt='Enter \'out_mp4_file_path\'', help=H3)
 # @click.option('--hide/--no-hide', default=True, help=H4)
-def main(in_mp4_file_path, json_file_path, out_mp4_file_path, hide):
+def visualize(in_mp4_file_path, json_file_path, out_mp4_file_path, hide, bbox=False):
     # type: (str, str, str, bool) -> None
     """
     Script that provides a visual representation of the annotations
@@ -91,11 +92,12 @@ def main(in_mp4_file_path, json_file_path, out_mp4_file_path, hide):
             color = colors[int(p_id) % len(colors)]
 
             # draw pose on image
-            #image = pose.draw(image=image, color=color)
 
-            bbox = np.array(pose.bbox_2d_padded).astype(int)
-            image = cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), color, 2)
-
+            if bbox:
+                bbox = np.array(pose.bbox_2d_padded).astype(int)
+                image = cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), color, 2)
+            else:
+                image = pose.draw(image=image, color=color)
 
         writer.append_data(np.vstack([image, image[-8:, :]]))
         print(f'\r▸ progress: {100 * (frame_number / 1800):6.2f}%', end='')
@@ -105,4 +107,8 @@ def main(in_mp4_file_path, json_file_path, out_mp4_file_path, hide):
 
 
 if __name__ == '__main__':
-    main("data/seq_8/seq_8.mp4", "data/seq_8/seq_8.json", "res_bbox.mp4", True)
+
+    for j in range(0, 16):
+        seq_path = f"C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_{j}"
+        visualize(os.path.join(seq_path, f"seq_{j}.mp4"), os.path.join(seq_path, f"seq_{j}.json"),
+                  os.path.join(seq_path, f"res_seq_{j}_pose.mp4"), True, bbox=False)

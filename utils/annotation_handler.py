@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     # Conversation to JTA DATASET JASON
 
-    for j in range(2, 14):
+    for j in range(14, 16):
         seq_path = f"C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_{j}"
 
         print(seq_path)

@@ -6,7 +6,7 @@ from typing import *
 import cv2
 import numpy as np
 
-from joint import Joint
+from utils.ann_visualization.joint import Joint
 
 
 class Pose(list):

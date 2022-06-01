@@ -80,12 +80,15 @@ def visualize(in_mp4_file_path, json_file_path, out_mp4_file_path, hide, bbox=Fa
         frame_data = data[data[:, 0] == frame_number]  # type: np.ndarray
 
         for p_id in set(frame_data[:, 1]):
-            pose = get_pose(frame_data=frame_data, person_id=p_id)
+
+            print(p_id)
+            exit()
+            #pose = get_pose(frame_data=frame_data, person_id=p_id)
 
             # if the "hide" flag is set, ignore the "invisible" poses
             # (invisible pose = pose of which I do not see any joint)
-            if hide and pose.invisible:
-                continue
+            #if hide and pose.invisible:
+            #    continue
 
             # select pose color base on its unique identifier
             color = colors[int(p_id) % len(colors)]
@@ -93,15 +96,15 @@ def visualize(in_mp4_file_path, json_file_path, out_mp4_file_path, hide, bbox=Fa
             # draw pose on image
 
             if bbox:
-                bbox = np.array(pose.bbox_2d_padded).astype(int)
+                #bbox = np.array(pose.bbox_2d_padded).astype(int)
                 image = cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), color, 2)
             else:
-                image = pose.draw(image=image, color=color)
+                pass#image = pose.draw(image=image, color=color)
 
-        writer.append_data(np.vstack([image, image[-8:, :]]))
+        #writer.append_data(np.vstack([image, image[-8:, :]]))
         print(f'\r▸ progress: {100 * (frame_number / 1800):6.2f}%', end='')
 
-    writer.close()
+    #writer.close()
     print(f'\n▸ video with annotations: \'{out_mp4_file_path.abspath()}\'\n')
 
 
@@ -109,5 +112,5 @@ if __name__ == '__main__':
 
     for j in range(0, 16):
         seq_path = f"C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_{j}"
-        visualize(os.path.join(seq_path, f"seq_{j}.mp4"), os.path.join(seq_path, f"seq_{j}.json"),
+        visualize(os.path.join(seq_path, f"seq_{j}.mp4"), os.path.join(seq_path, f"seq_{j}_imavis.json"),
                   os.path.join(seq_path, f"res_seq_{j}_pose.mp4"), True, bbox=False)

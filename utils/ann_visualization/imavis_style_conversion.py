@@ -37,8 +37,8 @@ def json_imavis_style_conversion(json_file_path):
             pose = get_pose(frame_data=frame_data, person_id=p_id)
 
             # get bbox of the ped:  ( x, y, width, height )
-            bbox = np.array(pose.bbox_2d_padded)
-            row = np.concatenate([[frame_number, p_id], bbox]).astype(int)
+            bbox = np.array(pose.bbox_2d_padded).astype(int)
+            row = np.concatenate([[frame_number, p_id], bbox])
 
             new_data.append(list(row))
 

@@ -57,7 +57,6 @@ H4 = 'if `hide` the annotations of people completely occluded by objects will no
 # @click.option('--out_mp4_file_path', type=click.Path(), prompt='Enter \'out_mp4_file_path\'', help=H3)
 # @click.option('--hide/--no-hide', default=True, help=H4)
 def visualize(in_mp4_file_path, json_file_path, out_mp4_file_path, hide, bbox=False):
-    # type: (str, str, str, bool) -> None
     """
     Script that provides a visual representation of the annotations
     """

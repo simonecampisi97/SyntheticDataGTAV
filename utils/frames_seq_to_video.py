@@ -24,7 +24,7 @@ def get_file_folder_list(video_folder):
 
 if __name__ == "__main__":
 
-    for i in range(14, 16):
+    for i in range(16, 18):
 
         seq_path = f"C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_{i}"
 

@@ -2,6 +2,7 @@
 # ---------------------
 
 import json
+import os
 import sys
 
 import click
@@ -10,7 +11,6 @@ from path import Path
 
 from utils.ann_visualization.joint import Joint
 from utils.ann_visualization.pose import Pose
-
 
 MAX_COLORS = 42
 
@@ -33,100 +33,115 @@ def get_pose(frame_data, person_id):
 H1 = 'path of the output directory'
 
 
-@click.command()
-@click.option('--out_dir_path', type=click.Path(), prompt='Enter \'out_dir_path\'', help=H1)
-def main(out_dir_path):
-    # type: (str) -> None
+# @click.command()
+# @click.option('--out_dir_path', type=click.Path(), prompt='Enter \'out_dir_path\'', help=H1)
+def main(folder_sequence):
     """
     Script for annotation conversion (from JTA format to COCO format)
     """
 
-    out_dir_path = Path(out_dir_path).abspath()
-    if not out_dir_path.exists():
-        out_dir_path.makedirs()
+    # out_dir_path = Path(out_dir_path).abspath()
+    # if not out_dir_path.exists():
+    #    out_dir_path.makedirs()
 
-    for dir in Path('annotations').dirs():
-        out_subdir_path = out_dir_path / dir.basename()
-        if not out_subdir_path.exists():
-            out_subdir_path.makedirs()
+
+
+    for dir in Path(folder_sequence).dirs():
+        # out_subdir_path = out_dir_path / dir.basename()
+        # if not out_subdir_path.exists():
+        #    out_subdir_path.makedirs()
         print(f'▸ converting \'{dir.basename()}\' set')
         for anno in dir.files():
 
-            with open(anno, 'r') as json_file:
-                data = json.load(json_file)
-                data = np.array(data)
 
-            print(f'▸ converting annotations of \'{Path(anno).abspath()}\'')
 
-            # getting sequence number from `anno`
-            sequence = None
-            try:
-                sequence = int(Path(anno).basename().split('_')[1].split('.')[0])
-            except:
-                print('[!] error during conversion.')
-                print('\ttry using JSON files with the original nomenclature.')
+            if anno.endswith(".json"):
 
-            coco_dict = {
-                'info': {
-                    'description': f'JTA 2018 Dataset - Sequence #{sequence}',
-                    'url': 'http://aimagelab.ing.unimore.it/jta',
-                    'version': '1.0',
-                    'year': 2018,
-                    'contributor': 'AImage Lab',
-                    'date_created': '2018/01/28',
-                },
-                'licences': [{
-                    'url': 'http://creativecommons.org/licenses/by-nc/2.0',
-                    'id': 2,
-                    'name': 'Attribution-NonCommercial License'
-                }],
-                'images': [],
-                'annotations': [],
-                'categories': [{
-                    'supercategory': 'person',
-                    'id': 1,
-                    'name': 'person',
-                    'keypoints': Joint.NAMES,
-                    'skeleton': Pose.SKELETON
-                }]
-            }
 
-            for frame_number in range(0, 900):
+                with open(anno, 'r') as json_file:
+                    data = json.load(json_file)
+                    data = np.array(data)
 
-                image_id = sequence * 1000 + (frame_number + 1)
-                coco_dict['images'].append({
-                    'license': 4,
-                    'file_name': f'{frame_number + 1}.jpg',
-                    'height': 1080,
-                    'width': 1920,
-                    'date_captured': '2018-01-28 00:00:00',
-                    'id': image_id
-                })
+                print(f'▸ converting annotations of \'{Path(anno).abspath()}\'')
 
-                # NOTE: frame #0 does NOT exists: first frame is #1
-                frame_data = data[data[:, 0] == frame_number + 1]  # type: np.ndarray
+                # getting sequence number from `anno`
+                sequence = None
+                try:
+                    sequence = int(Path(anno).basename().split('_')[1].split('.')[0])
+                except:
+                    print('[!] error during conversion.')
+                    print('\ttry using JSON files with the original nomenclature.')
 
-                for p_id in set(frame_data[:, 1]):
-                    pose = get_pose(frame_data=frame_data, person_id=p_id)
+                out_file_path = os.path.join(dir, f'seq_{sequence}.coco.json')
 
-                    # ignore the "invisible" poses
-                    # (invisible pose = pose of which I do not see any joint)
-                    if pose.invisible:
-                        continue
+                if os.path.isfile(out_file_path):
+                    continue
 
-                    annotation = pose.coco_annotation
-                    annotation['image_id'] = image_id
-                    annotation['id'] = image_id * 100000 + int(p_id)
-                    annotation['category_id'] = 1
-                    coco_dict['annotations'].append(annotation)
+                coco_dict = {
+                    'info': {
+                        'description': f'JTA 2018 Dataset - Sequence #{sequence}',
+                        'url': 'http://aimagelab.ing.unimore.it/jta',
+                        'version': '1.0',
+                        'year': 2018,
+                        'contributor': 'AImage Lab',
+                        'date_created': '2018/01/28',
+                    },
+                    'licences': [{
+                        'url': 'http://creativecommons.org/licenses/by-nc/2.0',
+                        'id': 2,
+                        'name': 'Attribution-NonCommercial License'
+                    }],
+                    'images': [],
+                    'annotations': [],
+                    'categories': [{
+                        'supercategory': 'person',
+                        'id': 1,
+                        'name': 'person',
+                        'keypoints': Joint.NAMES,
+                        'skeleton': Pose.SKELETON
+                    }]
+                }
 
-                print(f'\r▸ progress: {100 * (frame_number / 899):6.2f}%', end='')
+                for frame_number in range(0, 900):
 
-            print()
-            out_file_path = out_subdir_path / f'seq_{sequence}.coco.json'
-            with open(out_file_path, 'w') as f:
-                json.dump(coco_dict, f)
+                    image_id = sequence * 1000 + (frame_number + 1)
+                    coco_dict['images'].append({
+                        'license': 4,
+                        'file_name': f'{frame_number + 1}.jpg',
+                        'height': 1080,
+                        'width': 1920,
+                        'date_captured': '2018-01-28 00:00:00',
+                        'id': image_id
+                    })
+
+                    # NOTE: frame #0 does NOT exists: first frame is #1
+                    frame_data = data[data[:, 0] == frame_number + 1]  # type: np.ndarray
+
+                    for p_id in set(frame_data[:, 1]):
+                        pose = get_pose(frame_data=frame_data, person_id=p_id)
+
+                        # ignore the "invisible" poses
+                        # (invisible pose = pose of which I do not see any joint)
+                        if pose.invisible:
+                            continue
+
+                        annotation = pose.coco_annotation
+                        annotation['image_id'] = image_id
+                        annotation['id'] = image_id * 100000 + int(p_id)
+                        annotation['category_id'] = 1
+                        coco_dict['annotations'].append(annotation)
+
+                    print(f'\r▸ progress: {100 * (frame_number / 899):6.2f}%', end='')
+
+                print()
+
+
+
+                with open(out_file_path, 'w') as f:
+                    json.dump(coco_dict, f)
 
 
 if __name__ == '__main__':
-    main()
+    folder_sequence = f"C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS"
+
+    main(folder_sequence)

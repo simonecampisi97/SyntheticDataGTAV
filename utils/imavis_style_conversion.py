@@ -142,7 +142,7 @@ def json_imavis_style_conversion(json_file_path, out_folder):
 
             pose = get_pose(frame_data=frame_data, person_id=p_id)
 
-            if pose.head_not_visible or pose.half_not_visible:
+            if pose.head_not_visible or pose.half_not_visible or pose.invisible:
                 continue
 
             bbox = np.array(pose.bbox_2d_padded).astype(int)

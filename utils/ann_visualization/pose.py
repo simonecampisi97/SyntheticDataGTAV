@@ -69,8 +69,8 @@ class Pose(list):
             if j.name in ['head_top', 'head_center', 'neck']:
                 head_joints.append(j)
 
-        for j in head_joints:
-            if not j.occ:
+        for h_j in head_joints:
+            if not h_j.occ:
                 return False
 
         return True

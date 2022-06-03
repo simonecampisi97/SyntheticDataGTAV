@@ -36,7 +36,6 @@ def prettify(elem):
 
 
 def create_xml_root(name_root: str):
-
     root = gfg.Element(name_root)
     root.append(single_text_elem("version", 1.1))
 
@@ -58,7 +57,6 @@ def label_elem_meta(name):
 
 
 def create_meta_xml(n_frames: int):
-
     meta_node = gfg.Element("meta")
 
     task_node = gfg.Element("task")
@@ -77,8 +75,6 @@ def create_meta_xml(n_frames: int):
     for e in LABEL_MAP.values():
         print(e)
         labels.append(label_elem_meta(e))
-
-
 
     return meta_node
 
@@ -150,10 +146,30 @@ def json_imavis_style_conversion(json_file_path, out_folder):
             if pose.head_not_visible or pose.half_not_visible:
                 continue
 
-            bbox = np.array(pose.bbox_2d).astype(int)
+            bbox = np.array(pose.bbox_2d_padded).astype(int)
             x, y, width, height = bbox
 
-            image_node.append(get_box_node(LABEL_MAP[1], x, y, x+width, y+width))
+            if x < 0:
+                x = 0
+            if y < 0:
+                y = 0
+
+            if x > FRAME_WIDTH:
+                x = FRAME_WIDTH
+
+            if y > FRAME_HEIGHT:
+                y = FRAME_HEIGHT
+
+            x2 = x + width
+            y2 = y + height
+
+            if x2 > FRAME_WIDTH:
+                x2 = FRAME_WIDTH
+
+            if y2 > FRAME_HEIGHT:
+                y2 = FRAME_HEIGHT
+
+            image_node.append(get_box_node(LABEL_MAP[1], x, y, x2, y2))
 
         xml_root.append(image_node)
         print(f'\r▸"Annotation seq_{n_seq} progress: {100 * (frame_number / (n_frames - 1)):6.2f}%', end='')

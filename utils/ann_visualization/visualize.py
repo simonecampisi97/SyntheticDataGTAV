@@ -91,7 +91,7 @@ def visualize(in_mp4_file_path, xml_file_path, out_mp4_file_path, hide, plot_bbo
                 # bbox = np.array(pose.bbox_2d_padded).astype(int)
 
                 bbox = np.array(det.points).astype(int)
-                image = cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), color, 2)
+                image = cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color, 2)
 
             else:
                 pass  # image = pose.draw(image=image, color=color)

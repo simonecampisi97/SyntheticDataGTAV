@@ -83,7 +83,7 @@ class Pose(list):
             if j.occ:
                 n_not_visible += 1
 
-        return n_not_visible >= math.ceil(len(self) / 2)
+        return n_not_visible >= (len(self) // 2)
 
     @property
     def bbox_2d(self):

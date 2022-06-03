@@ -73,7 +73,6 @@ def create_meta_xml(n_frames: int):
     task_node.append(labels)
 
     for e in LABEL_MAP.values():
-        print(e)
         labels.append(label_elem_meta(e))
 
     return meta_node

@@ -56,7 +56,7 @@ H4 = 'if `hide` the annotations of people completely occluded by objects will no
 # @click.option('--json_file_path', type=click.Path(exists=True), prompt='Enter \'json_file_path\'', help=H2)
 # @click.option('--out_mp4_file_path', type=click.Path(), prompt='Enter \'out_mp4_file_path\'', help=H3)
 # @click.option('--hide/--no-hide', default=True, help=H4)
-def visualize(in_mp4_file_path, json_file_path, out_mp4_file_path, hide, bbox=False):
+def visualize(in_mp4_file_path, json_file_path, out_mp4_file_path, hide, plot_bbox=False):
     """
     Script that provides a visual representation of the annotations
     """
@@ -79,11 +79,9 @@ def visualize(in_mp4_file_path, json_file_path, out_mp4_file_path, hide, bbox=Fa
         # NOTE: frame #0 does NOT exists: first frame is #1
         frame_data = data[data[:, 0] == frame_number]  # type: np.ndarray
 
-        for p_id in set(frame_data[:, 1]):
+        for idx, p_id in enumerate(set(frame_data[:, 1])):
 
-            print(p_id)
-            exit()
-            #pose = get_pose(frame_data=frame_data, person_id=p_id)
+            # pose = get_pose(frame_data=frame_data, person_id=p_id)
 
             # if the "hide" flag is set, ignore the "invisible" poses
             # (invisible pose = pose of which I do not see any joint)
@@ -95,16 +93,23 @@ def visualize(in_mp4_file_path, json_file_path, out_mp4_file_path, hide, bbox=Fa
 
             # draw pose on image
 
-            if bbox:
-                #bbox = np.array(pose.bbox_2d_padded).astype(int)
-                image = cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), color, 2)
-            else:
-                pass#image = pose.draw(image=image, color=color)
+            if plot_bbox:
+                # bbox = np.array(pose.bbox_2d_padded).astype(int)
 
-        #writer.append_data(np.vstack([image, image[-8:, :]]))
+                bbox = frame_data[idx, -4:].astype(int)
+                image = cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), color, 2)
+
+                #cv2.imshow("Display_Image", image)
+
+                #if cv2.waitKey(1) & 0xFF == ord('q'):
+                #    break
+            else:
+                pass  # image = pose.draw(image=image, color=color)
+
+        writer.append_data(np.vstack([image, image[-8:, :]]))
         print(f'\r▸ progress: {100 * (frame_number / 1800):6.2f}%', end='')
 
-    #writer.close()
+    writer.close()
     print(f'\n▸ video with annotations: \'{out_mp4_file_path.abspath()}\'\n')
 
 
@@ -112,5 +117,6 @@ if __name__ == '__main__':
 
     for j in range(0, 16):
         seq_path = f"C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_{j}"
-        visualize(os.path.join(seq_path, f"seq_{j}.mp4"), os.path.join(seq_path, f"seq_{j}_imavis.json"),
-                  os.path.join(seq_path, f"res_seq_{j}_pose.mp4"), True, bbox=False)
+        visualize(in_mp4_file_path=os.path.join(seq_path, f"seq_{j}.mp4"),
+                  json_file_path=os.path.join(seq_path, f"seq_{j}_imavis.json"),
+                  out_mp4_file_path=os.path.join(seq_path, f"res_seq_{j}_PROVA.mp4"), hide=True, plot_bbox=True)

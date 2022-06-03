@@ -78,11 +78,9 @@ def visualize(in_mp4_file_path, xml_file_path, out_mp4_file_path, hide, plot_bbo
     detections_by_frame = parse_cvat_images_xml(Path(xml_file_path))
 
     print(f'▸ visualizing annotations of \'{Path(in_mp4_file_path).abspath()}\'')
-    for frame_number, detections in enumerate(detections_by_frame):
+    for frame_number, image in enumerate(reader):
 
-        for det in detections:
-            print(det.points)
-            exit()
+        for det in detections_by_frame[frame_number]:
 
             # select pose color base on its unique identifier
             color = colors[int(25) % len(colors)]

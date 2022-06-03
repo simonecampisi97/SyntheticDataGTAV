@@ -150,23 +150,10 @@ def json_imavis_style_conversion(json_file_path, out_folder):
             if pose.head_not_visible or pose.half_not_visible:
                 continue
 
-            bbox = np.array(pose.bbox_2d_padded).astype(int)
+            bbox = np.array(pose.bbox_2d).astype(int)
             x, y, width, height = bbox
 
-            if x < 0:
-                x = 0
-            if y < 0:
-                y = 0
-
-            if x > FRAME_WIDTH:
-                x= FRAME_WIDTH
-            if y > FRAME_HEIGHT:
-                y = FRAME_HEIGHT
-
-            y2 = (y + height) if (y + height) < FRAME_HEIGHT else FRAME_HEIGHT
-            x2 = (x + width) if (x + width) < FRAME_WIDTH else FRAME_WIDTH
-
-            image_node.append(get_box_node(LABEL_MAP[1], x, y, x2, y2))
+            image_node.append(get_box_node(LABEL_MAP[1], x, y, x+width, y+width))
 
         xml_root.append(image_node)
         print(f'\r▸"Annotation seq_{n_seq} progress: {100 * (frame_number / (n_frames - 1)):6.2f}%', end='')

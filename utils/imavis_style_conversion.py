@@ -15,6 +15,9 @@ from utils.ann_visualization.visualize import get_colors
 
 MAX_COLORS = 42
 
+FRAME_WIDTH = 1920
+FRAME_HEIGHT = 1080
+
 LABEL_MAP = dict(
     person=1,
     dog=2,
@@ -47,8 +50,8 @@ def get_image_node(id_frame: int, frame_name: str, frame_width: int, frame_heigh
     return image_node
 
 
-def get_box_node(top_elem, label: int, xtl: int, ytl: int, xbr: int, ybr: int):
-    box_node = gfg.SubElement(top_elem, "box")
+def get_box_node(label: int, xtl: int, ytl: int, xbr: int, ybr: int):
+    box_node = gfg.Element("box")
     box_node.set("label", str(label))
     box_node.set("xtl", str(xtl))
     box_node.set("ytl", str(ytl))
@@ -70,7 +73,7 @@ def get_pose(frame_data, person_id):
     return Pose(pose)
 
 
-def json_imavis_style_conversion(json_file_path, seq_path):
+def json_imavis_style_conversion(json_file_path):
     """
     Script that provides a visual representation of the annotations
     """
@@ -79,43 +82,46 @@ def json_imavis_style_conversion(json_file_path, seq_path):
         data = json.load(json_file)
         data = np.array(data)
 
+    n_seq = json_file_path.split(os.sep)[-1].split(".")[0].split("_")[1]
+
     n_frames = int(data[-1][0])
 
-    colors = get_colors(number_of_colors=MAX_COLORS, cmap_name='jet')
-
-    new_data = []
+    xml_root = create_xml_root("annotations")
 
     for frame_number in range(n_frames + 1):
 
-        # NOTE: frame #0 does NOT exist: first frame is #1
+        # Get all the data for a given frame
         frame_data = data[data[:, 0] == frame_number]  # type: np.ndarray
 
-        for p_id in set(frame_data[:, 1]):
-            pose = get_pose(frame_data=frame_data, person_id=p_id)
+        image_node = get_image_node(id_frame=frame_number,
+                                    frame_name=f"{frame_number}.jpg",
+                                    frame_width=FRAME_WIDTH,
+                                    frame_height=FRAME_HEIGHT)
 
+        for p_id in set(frame_data[:, 1]):
+            # pose = get_pose(frame_data=frame_data, person_id=p_id)
+
+            # if the "hide" flag is set, ignore the "invisible" poses
+            # (invisible pose = pose of which I do not see any joint)
+            # if hide and pose.invisible:
+            #    continue
+
+            pose = get_pose(frame_data=frame_data, person_id=p_id)
             # get bbox of the ped:  ( x, y, width, height )
             bbox = np.array(pose.bbox_2d_padded).astype(int)
-            row = np.concatenate([[frame_number, p_id], bbox])
 
-            new_data.append(list(row))
+            x, y, width, height = bbox
 
-        print(f'\r▸"Annotation seq_{j} progress: {100 * (frame_number / n_frames):6.2f}%', end='')
+            image_node.append(get_box_node(LABEL_MAP["person"], x, y, x + width, y + height))
 
-    with open(os.path.join(seq_path, f"seq_{j}_imavis.json"), "w") as f:
-        json.dump(new_data, f)
+        xml_root.append(image_node)
+        print(f'\r▸"Annotation seq_{n_seq} progress: {100 * (frame_number / n_frames):6.2f}%', end='')
 
-
-if __name__ == "__main__":
-    root = create_xml_root("annotations")
-
-    img = get_image_node(0, "prova1", 1920, 1080)
-    img.append(get_box_node(img, 0, 12, 45, 300, 450))
-    img.append(get_box_node(img, 0, 12, 45, 300, 450))
-    img.append(get_box_node(img, 0, 12, 45, 300, 450))
-
-    root.append(img)
-
-    xml_str = prettify(root)
+    xml_str = prettify(xml_root)
 
     with open("prova.xml", "w") as f:
         f.write(xml_str)
+
+
+if __name__ == "__main__":
+    json_imavis_style_conversion("C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_0\\seq_0.json")

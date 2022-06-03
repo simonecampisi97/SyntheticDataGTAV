@@ -16,6 +16,8 @@ from utils.ann_visualization.joint import Joint
 from utils.ann_visualization.pose import Pose
 import cv2
 
+from utils.ann_visualization.utils_imavis import parse_cvat_images_xml
+
 MAX_COLORS = 42
 
 # check python version
@@ -56,7 +58,7 @@ H4 = 'if `hide` the annotations of people completely occluded by objects will no
 # @click.option('--json_file_path', type=click.Path(exists=True), prompt='Enter \'json_file_path\'', help=H2)
 # @click.option('--out_mp4_file_path', type=click.Path(), prompt='Enter \'out_mp4_file_path\'', help=H3)
 # @click.option('--hide/--no-hide', default=True, help=H4)
-def visualize(in_mp4_file_path, json_file_path, out_mp4_file_path, hide, plot_bbox=False):
+def visualize(in_mp4_file_path, xml_file_path, out_mp4_file_path, hide, plot_bbox=False):
     """
     Script that provides a visual representation of the annotations
     """
@@ -67,36 +69,30 @@ def visualize(in_mp4_file_path, json_file_path, out_mp4_file_path, hide, plot_bb
     reader = imageio.get_reader(in_mp4_file_path)
     writer = imageio.get_writer(out_mp4_file_path, fps=20)
 
-    with open(json_file_path, 'r') as json_file:
-        data = json.load(json_file)
-        data = np.array(data)
+    # with open(json_file_path, 'r') as json_file:
+    #    data = json.load(json_file)
+    #    data = np.array(data)
 
     colors = get_colors(number_of_colors=MAX_COLORS, cmap_name='jet')
 
+    detections_by_frame = parse_cvat_images_xml(Path(xml_file_path))
+
     print(f'▸ visualizing annotations of \'{Path(in_mp4_file_path).abspath()}\'')
-    for frame_number, image in enumerate(reader):
+    for frame_number, detections in enumerate(detections_by_frame):
 
-        # NOTE: frame #0 does NOT exists: first frame is #1
-        frame_data = data[data[:, 0] == frame_number]  # type: np.ndarray
-
-        for idx, p_id in enumerate(set(frame_data[:, 1])):
-
-            pose = get_pose(frame_data=frame_data, person_id=p_id)
-
-            # if the "hide" flag is set, ignore the "invisible" poses
-            # (invisible pose = pose of which I do not see any joint)
-            if pose.invisible:
-                continue
+        for det in detections:
+            print(det.points)
+            exit()
 
             # select pose color base on its unique identifier
-            color = colors[int(p_id) % len(colors)]
+            color = colors[int(25) % len(colors)]
 
             # draw pose on image
 
             if plot_bbox:
                 # bbox = np.array(pose.bbox_2d_padded).astype(int)
 
-                bbox = frame_data[idx, -4:].astype(int)
+                bbox = np.array(det.points).astype(int)
                 image = cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), color, 2)
 
             else:
@@ -114,5 +110,7 @@ if __name__ == '__main__':
     for j in range(0, 16):
         seq_path = f"C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_{j}"
         visualize(in_mp4_file_path=os.path.join(seq_path, f"seq_{j}.mp4"),
-                  json_file_path=os.path.join(seq_path, f"seq_{j}_imavis.json"),
+                  xml_file_path=os.path.join(seq_path, f"seq_{j}_imavis.xml"),
                   out_mp4_file_path=os.path.join(seq_path, f"res_seq_{j}_PROVA.mp4"), hide=True, plot_bbox=True)
+
+        exit()

@@ -30,14 +30,14 @@ LABEL_MAP = {
 def prettify(elem):
     """Return a pretty-printed XML string for the Element.
     """
-    rough_string = ElementTree.tostring(elem, 'utf-8')
+    rough_string = ElementTree.tostring(elem, encoding='utf8')
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="\t")
 
 
 def create_xml_root(name_root: str):
 
-    root = gfg.Element(name_root, encodings="utf-8")
+    root = gfg.Element(name_root)
     root.append(single_text_elem("version", 1.1))
 
     return root
@@ -72,8 +72,15 @@ def create_meta_xml(n_frames: int):
     # Labels
     labels = gfg.Element("labels")
 
+    task_node.append(labels)
+
     for e in LABEL_MAP.values():
+        print(e)
         labels.append(label_elem_meta(e))
+
+
+
+    return meta_node
 
 
 def get_image_node(id_frame: int, frame_name: str, frame_width: int, frame_height: int):
@@ -124,6 +131,7 @@ def json_imavis_style_conversion(json_file_path, out_folder):
     n_frames = int(data[-1][0]) + 1
 
     xml_root = create_xml_root("annotations")
+    xml_root.append(create_meta_xml(n_frames))
 
     for frame_number in range(n_frames):
 
@@ -145,14 +153,27 @@ def json_imavis_style_conversion(json_file_path, out_folder):
             bbox = np.array(pose.bbox_2d_padded).astype(int)
             x, y, width, height = bbox
 
-            image_node.append(get_box_node(LABEL_MAP[1], x, y, (x + width), (y + height)))
+            if x < 0:
+                x = 0
+            if y < 0:
+                y = 0
+
+            if x > FRAME_WIDTH:
+                x= FRAME_WIDTH
+            if y > FRAME_HEIGHT:
+                y = FRAME_HEIGHT
+
+            y2 = (y + height) if (y + height) < FRAME_HEIGHT else FRAME_HEIGHT
+            x2 = (x + width) if (x + width) < FRAME_WIDTH else FRAME_WIDTH
+
+            image_node.append(get_box_node(LABEL_MAP[1], x, y, x2, y2))
 
         xml_root.append(image_node)
         print(f'\r▸"Annotation seq_{n_seq} progress: {100 * (frame_number / (n_frames - 1)):6.2f}%', end='')
 
     xml_str = prettify(xml_root)
 
-    with open(os.path.join(out_folder, f"seq_{n_seq}_imavis.json"), "w") as f:
+    with open(os.path.join(out_folder, f"seq_{n_seq}_imavis.xml"), "w") as f:
         f.write(xml_str)
 
 

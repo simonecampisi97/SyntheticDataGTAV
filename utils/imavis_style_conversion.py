@@ -25,6 +25,8 @@ LABEL_MAP = {
 }
 
 
+# ["id", "name", "overlap", "bugtracker", "created", "updated", "frame_filter", "segments", "owner", "assignee"]:
+
 def prettify(elem):
     """Return a pretty-printed XML string for the Element.
     """
@@ -34,7 +36,44 @@ def prettify(elem):
 
 
 def create_xml_root(name_root: str):
-    return gfg.Element(name_root)
+
+    root = gfg.Element(name_root, encodings="utf-8")
+    root.append(single_text_elem("version", 1.1))
+
+    return root
+
+
+def single_text_elem(name_elem, text):
+    elem = gfg.Element(name_elem)
+    elem.text = str(text)
+    return elem
+
+
+def label_elem_meta(name):
+    label = gfg.Element("label")
+    label.append(single_text_elem("name", name))
+    label.append(single_text_elem("attributes", ""))
+
+    return label
+
+
+def create_meta_xml(n_frames: int):
+
+    meta_node = gfg.Element("meta")
+
+    task_node = gfg.Element("task")
+    meta_node.append(task_node)
+
+    task_node.append(single_text_elem("size", n_frames))  # Size Filed
+    task_node.append(single_text_elem("mode", "annotation"))  # Size Filed
+    task_node.append(single_text_elem("start_frame", 0))  # Start Frame Filed
+    task_node.append(single_text_elem("end_frame", n_frames - 1))  # End Frame Filed
+
+    # Labels
+    labels = gfg.Element("labels")
+
+    for e in LABEL_MAP.values():
+        labels.append(label_elem_meta(e))
 
 
 def get_image_node(id_frame: int, frame_name: str, frame_width: int, frame_height: int):
@@ -82,11 +121,11 @@ def json_imavis_style_conversion(json_file_path, out_folder):
 
     n_seq = json_file_path.split(os.sep)[-1].split(".")[0].split("_")[1]
 
-    n_frames = int(data[-1][0])
+    n_frames = int(data[-1][0]) + 1
 
     xml_root = create_xml_root("annotations")
 
-    for frame_number in range(n_frames + 1):
+    for frame_number in range(n_frames):
 
         # Get all the data for a given frame
         frame_data = data[data[:, 0] == frame_number]  # type: np.ndarray
@@ -106,10 +145,10 @@ def json_imavis_style_conversion(json_file_path, out_folder):
             bbox = np.array(pose.bbox_2d_padded).astype(int)
             x, y, width, height = bbox
 
-            image_node.append(get_box_node(LABEL_MAP[1], x, y, (x + width), (y + height) ))
+            image_node.append(get_box_node(LABEL_MAP[1], x, y, (x + width), (y + height)))
 
         xml_root.append(image_node)
-        print(f'\r▸"Annotation seq_{n_seq} progress: {100 * (frame_number / n_frames):6.2f}%', end='')
+        print(f'\r▸"Annotation seq_{n_seq} progress: {100 * (frame_number / (n_frames - 1)):6.2f}%', end='')
 
     xml_str = prettify(xml_root)
 

@@ -5,27 +5,23 @@ import numpy as np
 from utils.ann_visualization.joint import Joint
 from utils.ann_visualization.pose import Pose
 from xml.dom import minidom
-from path import Path
-import cv2
 
 import xml.etree.ElementTree as gfg
 from xml.etree import ElementTree
-
-from utils.ann_visualization.visualize import get_colors
 
 MAX_COLORS = 42
 
 FRAME_WIDTH = 1920
 FRAME_HEIGHT = 1080
 
-LABEL_MAP = dict(
-    person=1,
-    dog=2,
-    car=3,
-    truck=4,
-    motorcycle=5,
-    bicycle=6,
-)
+LABEL_MAP = {
+    1: "person",
+    2: "dog",
+    3: "car",
+    4: "truck",
+    5: "motorcycle",
+    8: "bicycle",
+}
 
 
 def prettify(elem):
@@ -36,7 +32,7 @@ def prettify(elem):
     return reparsed.toprettyxml(indent="\t")
 
 
-def create_xml_root(name_root):
+def create_xml_root(name_root: str):
     return gfg.Element(name_root)
 
 
@@ -50,9 +46,10 @@ def get_image_node(id_frame: int, frame_name: str, frame_width: int, frame_heigh
     return image_node
 
 
-def get_box_node(label: int, xtl: int, ytl: int, xbr: int, ybr: int):
+def get_box_node(label: str, xtl: int, ytl: int, xbr: int, ybr: int, occluded=0):
     box_node = gfg.Element("box")
-    box_node.set("label", str(label))
+    box_node.set("label", label)
+    box_node.set("occluded", str(occluded))
     box_node.set("xtl", str(xtl))
     box_node.set("ytl", str(ytl))
     box_node.set("xbr", str(xbr))
@@ -99,20 +96,25 @@ def json_imavis_style_conversion(json_file_path):
                                     frame_height=FRAME_HEIGHT)
 
         for p_id in set(frame_data[:, 1]):
-            # pose = get_pose(frame_data=frame_data, person_id=p_id)
-
             # if the "hide" flag is set, ignore the "invisible" poses
             # (invisible pose = pose of which I do not see any joint)
             # if hide and pose.invisible:
             #    continue
 
             pose = get_pose(frame_data=frame_data, person_id=p_id)
+
+            if pose.head_not_visible:
+                occluded = 0
+            else:
+                occluded = 1
+
+
+            # exit()
             # get bbox of the ped:  ( x, y, width, height )
             bbox = np.array(pose.bbox_2d_padded).astype(int)
-
             x, y, width, height = bbox
 
-            image_node.append(get_box_node(LABEL_MAP["person"], x, y, x + width, y + height))
+            image_node.append(get_box_node(LABEL_MAP[1], x, y, x + width, y + height, occluded=occluded))
 
         xml_root.append(image_node)
         print(f'\r▸"Annotation seq_{n_seq} progress: {100 * (frame_number / n_frames):6.2f}%', end='')

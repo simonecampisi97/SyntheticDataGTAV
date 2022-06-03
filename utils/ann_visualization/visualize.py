@@ -81,12 +81,12 @@ def visualize(in_mp4_file_path, json_file_path, out_mp4_file_path, hide, plot_bb
 
         for idx, p_id in enumerate(set(frame_data[:, 1])):
 
-            # pose = get_pose(frame_data=frame_data, person_id=p_id)
+            pose = get_pose(frame_data=frame_data, person_id=p_id)
 
             # if the "hide" flag is set, ignore the "invisible" poses
             # (invisible pose = pose of which I do not see any joint)
-            #if hide and pose.invisible:
-            #    continue
+            if pose.invisible:
+                continue
 
             # select pose color base on its unique identifier
             color = colors[int(p_id) % len(colors)]
@@ -99,10 +99,6 @@ def visualize(in_mp4_file_path, json_file_path, out_mp4_file_path, hide, plot_bb
                 bbox = frame_data[idx, -4:].astype(int)
                 image = cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[0] + bbox[2], bbox[1] + bbox[3]), color, 2)
 
-                #cv2.imshow("Display_Image", image)
-
-                #if cv2.waitKey(1) & 0xFF == ord('q'):
-                #    break
             else:
                 pass  # image = pose.draw(image=image, color=color)
 

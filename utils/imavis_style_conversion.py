@@ -63,20 +63,23 @@ def json_imavis_style_conversion(json_file_path, seq_path):
 def prettify(elem):
     """Return a pretty-printed XML string for the Element.
     """
-    rough_string = gfg.ElementTree.tostring(elem, 'utf-8')
+    rough_string = ElementTree.tostring(elem, 'utf-8')
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="\t")
 
 
+def create_xml_root(name_root):
+    return gfg.Element(name_root)
+
+
 def create_xml_annotations(root, id_frame, name, width, height):
-    elem = root.createElement(tagName="image")
+    image = gfg.Element("image")
+    image.set("id", id_frame)
+    image.set("name", name)
+    image.set("width", width)
+    image.set("height", height)
 
-    elem.setAttribute('id', id_frame)
-    elem.setAttribute('name', name)
-    elem.setAttribute('width', width)
-    elem.setAttribute('height', height)
-
-    root.appendChild(elem)
+    root.append(image)
 
 
 def get_pose(frame_data, person_id):
@@ -92,14 +95,11 @@ def get_pose(frame_data, person_id):
 
 
 if __name__ == "__main__":
-    root = create_xml_annotations()
+    root = create_xml_root("annotations")
 
-    create_image_filed(root, "0", "prova", "1920", "1080")
-    create_image_filed(root, "1", "prova", "1920", "1080")
-    create_image_filed(root, "2", "prova", "1920", "1080")
-    create_image_filed(root, "3", "prova", "1920", "1080")
+    create_xml_annotations(root, str(0), "prova", str(1920), str(1080))
 
-    xml_str = root.toprettyxml(indent="\t")
+    xml_str = prettify(root)
 
     with open("prova.xml", "w") as f:
         f.write(xml_str)

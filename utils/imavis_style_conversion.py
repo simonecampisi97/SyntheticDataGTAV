@@ -1,19 +1,31 @@
 import json
 import os
 
-import imageio
 import numpy as np
 from utils.ann_visualization.joint import Joint
 from utils.ann_visualization.pose import Pose
+from xml.dom import minidom
 from path import Path
 import cv2
+
+import xml.etree.ElementTree as gfg
+from xml.etree import ElementTree
 
 from utils.ann_visualization.visualize import get_colors
 
 MAX_COLORS = 42
 
+LABEL_MAP = dict(
+    person=1,
+    dog=2,
+    car=3,
+    truck=4,
+    motorcycle=5,
+    bicycle=6,
+)
 
-def json_imavis_style_conversion(json_file_path):
+
+def json_imavis_style_conversion(json_file_path, seq_path):
     """
     Script that provides a visual representation of the annotations
     """
@@ -48,6 +60,25 @@ def json_imavis_style_conversion(json_file_path):
         json.dump(new_data, f)
 
 
+def prettify(elem):
+    """Return a pretty-printed XML string for the Element.
+    """
+    rough_string = gfg.ElementTree.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent="\t")
+
+
+def create_xml_annotations(root, id_frame, name, width, height):
+    elem = root.createElement(tagName="image")
+
+    elem.setAttribute('id', id_frame)
+    elem.setAttribute('name', name)
+    elem.setAttribute('width', width)
+    elem.setAttribute('height', height)
+
+    root.appendChild(elem)
+
+
 def get_pose(frame_data, person_id):
     # type: (np.ndarray, int) -> Pose
     """
@@ -61,6 +92,20 @@ def get_pose(frame_data, person_id):
 
 
 if __name__ == "__main__":
+    root = create_xml_annotations()
+
+    create_image_filed(root, "0", "prova", "1920", "1080")
+    create_image_filed(root, "1", "prova", "1920", "1080")
+    create_image_filed(root, "2", "prova", "1920", "1080")
+    create_image_filed(root, "3", "prova", "1920", "1080")
+
+    xml_str = root.toprettyxml(indent="\t")
+
+    with open("prova.xml", "w") as f:
+        f.write(xml_str)
+
+    '''
     for j in range(18):
         seq_path = f"C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_{j}"
         json_imavis_style_conversion(os.path.join(seq_path, f"seq_{j}.json"))
+    '''

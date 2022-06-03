@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from path import Path
 
-from joint import Joint
-from pose import Pose
+from utils.ann_visualization.joint import Joint
+from utils.ann_visualization.pose import Pose
 import cv2
 
 MAX_COLORS = 42

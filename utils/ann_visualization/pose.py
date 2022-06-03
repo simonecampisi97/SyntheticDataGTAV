@@ -8,6 +8,8 @@ import numpy as np
 
 from utils.ann_visualization.joint import Joint
 
+import math
+
 
 class Pose(list):
     """
@@ -72,6 +74,16 @@ class Pose(list):
                 return False
 
         return True
+
+    @property
+    def half_not_visible(self):
+
+        n_not_visible = 0
+        for j in self:
+            if j.occ:
+                n_not_visible += 1
+
+        return n_not_visible >= math.ceil(len(self) / 2)
 
     @property
     def bbox_2d(self):

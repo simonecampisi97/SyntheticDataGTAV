@@ -8,6 +8,7 @@ from xml.dom import minidom
 
 import xml.etree.ElementTree as gfg
 from xml.etree import ElementTree
+from path import Path
 
 MAX_COLORS = 42
 
@@ -70,7 +71,7 @@ def get_pose(frame_data, person_id):
     return Pose(pose)
 
 
-def json_imavis_style_conversion(json_file_path):
+def json_imavis_style_conversion(json_file_path, out_folder):
     """
     Script that provides a visual representation of the annotations
     """
@@ -96,34 +97,35 @@ def json_imavis_style_conversion(json_file_path):
                                     frame_height=FRAME_HEIGHT)
 
         for p_id in set(frame_data[:, 1]):
-            # if the "hide" flag is set, ignore the "invisible" poses
-            # (invisible pose = pose of which I do not see any joint)
-            # if hide and pose.invisible:
-            #    continue
 
             pose = get_pose(frame_data=frame_data, person_id=p_id)
 
-            if pose.head_not_visible:
-                occluded = 0
-            else:
-                occluded = 1
+            if pose.head_not_visible or pose.half_not_visible:
+                continue
 
-
-            # exit()
-            # get bbox of the ped:  ( x, y, width, height )
             bbox = np.array(pose.bbox_2d_padded).astype(int)
             x, y, width, height = bbox
 
-            image_node.append(get_box_node(LABEL_MAP[1], x, y, x + width, y + height, occluded=occluded))
+            image_node.append(get_box_node(LABEL_MAP[1], x, y, (x + width), (y + height) ))
 
         xml_root.append(image_node)
         print(f'\r▸"Annotation seq_{n_seq} progress: {100 * (frame_number / n_frames):6.2f}%', end='')
 
     xml_str = prettify(xml_root)
 
-    with open("prova.xml", "w") as f:
+    with open(os.path.join(out_folder, f"seq_{n_seq}_imavis.json"), "w") as f:
         f.write(xml_str)
 
 
 if __name__ == "__main__":
-    json_imavis_style_conversion("C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_0\\seq_0.json")
+    folder_data = "C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\"
+
+    for dir in Path(folder_data).dirs():
+
+        name_dir = dir.split(os.sep)[-1]
+
+        for file in dir.files():
+            if name_dir + ".json" in file:
+                json_imavis_style_conversion(file, dir)
+
+        exit()

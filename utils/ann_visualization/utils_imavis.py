@@ -41,7 +41,14 @@ class Detection(object):
         height = self._br_y - self._tl_y
         assert width >= 0, width
         assert height >= 0, height
-        #assert width * height > 0, width * height
+
+        try:
+            assert width * height >= 0, width * height
+        except:
+            print("width * height: ", width * height)
+            print(self._tl_x, self._tl_y, self._br_x, self._br_y)
+            exit()
+
         if label == "cat" and "cat" not in LABEL_MAP:
             label = "dog"
         if label == "bus":
@@ -114,7 +121,6 @@ def parse_cvat_images_xml(xml_path: Path) -> List[List[Detection]]:
 
             if f4 < 0:
                 print("frame height f4 < 0: ", f4)
-
 
             if f1 > frame_width:
                 print("frame width f1 > width: ", f1)

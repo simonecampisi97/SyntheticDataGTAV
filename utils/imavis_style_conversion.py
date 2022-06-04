@@ -112,6 +112,21 @@ def get_pose(frame_data, person_id):
     return Pose(pose)
 
 
+def normalize_bbox(x, y):
+    if x < 0:
+        x = 0
+    if y < 0:
+        y = 0
+
+    if x > FRAME_WIDTH:
+        x = FRAME_WIDTH
+
+    if y > FRAME_HEIGHT:
+        y = FRAME_HEIGHT
+
+    return x, y
+
+
 def json_imavis_style_conversion(json_file_path, out_folder):
     """
     Script that provides a visual representation of the annotations
@@ -145,28 +160,14 @@ def json_imavis_style_conversion(json_file_path, out_folder):
             if pose.head_not_visible or pose.half_not_visible or pose.invisible:
                 continue
 
-            bbox = np.array(pose.bbox_2d_padded).astype(int)
-            x, y, width, height = bbox
+            x, y, width, height = pose.bbox_2d_padded
 
-            if x < 0:
-                x = 0
-            if y < 0:
-                y = 0
-
-            if x > FRAME_WIDTH:
-                x = FRAME_WIDTH
-
-            if y > FRAME_HEIGHT:
-                y = FRAME_HEIGHT
+            x, y = normalize_bbox(x, y)
 
             x2 = x + width
             y2 = y + height
 
-            if x2 > FRAME_WIDTH:
-                x2 = FRAME_WIDTH
-
-            if y2 > FRAME_HEIGHT:
-                y2 = FRAME_HEIGHT
+            x2, y2 = normalize_bbox(x2, y2)
 
             image_node.append(get_box_node(LABEL_MAP[1], x, y, x2, y2))
 
@@ -190,4 +191,4 @@ if __name__ == "__main__":
             if name_dir + ".json" in file:
                 json_imavis_style_conversion(file, dir)
 
-        exit()
+

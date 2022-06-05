@@ -176,7 +176,7 @@ def json_imavis_style_conversion(json_file_path, out_folder):
 
     xml_str = prettify(xml_root)
 
-    with open(os.path.join(out_folder, f"seq_{n_seq}_imavis.xml"), "w") as f:
+    with open(os.path.join(out_folder, f"seq_{n_seq}_CVAT.xml"), "w") as f:
         f.write(xml_str)
 
 

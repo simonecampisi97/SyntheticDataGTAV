@@ -108,7 +108,7 @@ if __name__ == '__main__':
     for j in range(0, 16):
         seq_path = f"C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_{j}"
         visualize(in_mp4_file_path=os.path.join(seq_path, f"seq_{j}.mp4"),
-                  xml_file_path=os.path.join(seq_path, f"seq_{j}_imavis.xml"),
-                  out_mp4_file_path=os.path.join(seq_path, f"res_seq_{j}.mp4"), hide=True, plot_bbox=True)
+                  xml_file_path=os.path.join(seq_path, f"seq_{j}_CVAT.xml"),
+                  out_mp4_file_path=os.path.join(seq_path, f"res_seq_{j}_cvat.mp4"), hide=True, plot_bbox=True)
 
 

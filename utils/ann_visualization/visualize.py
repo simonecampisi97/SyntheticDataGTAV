@@ -100,9 +100,11 @@ def visualize(in_mp4_file_path, xml_file_path, out_mp4_file_path, hide, plot_bbo
 
 if __name__ == '__main__':
 
-    for j in range(0, 16):
-        seq_path = f"C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\seq_{j}"
-        visualize(in_mp4_file_path=os.path.join(seq_path, f"seq_{j}.mp4"),
-                  xml_file_path=os.path.join(seq_path, f"seq_{j}_CVAT.xml"),
-                  out_mp4_file_path=os.path.join(seq_path, f"res_seq_{j}_cvat.mp4"), hide=True, plot_bbox=True)
+    folder_data = "C:\\Users\\simoc\\Desktop\\Synthetic Data IMAVIS\\"
 
+    for dir in Path(folder_data).dirs():
+        name_dir = dir.split(os.sep)[-1]
+
+        visualize(in_mp4_file_path=os.path.join(dir, f"{name_dir}.mp4"),
+                  xml_file_path=os.path.join(dir, f"{name_dir}_CVAT.xml"),
+                  out_mp4_file_path=os.path.join(dir, f"res_{name_dir}_cvat.mp4"), hide=True, plot_bbox=True)

@@ -156,20 +156,17 @@ def json_imavis_style_conversion(json_file_path, out_folder):
         for p_id in set(frame_data[:, 1]):
 
             pose = get_pose(frame_data=frame_data, person_id=p_id)
+            pose.handle_joints_not_on_screen()
 
             if pose.head_not_visible or pose.half_not_visible or pose.invisible:
                 continue
 
-            x, y, width, height = pose.bbox_2d_padded
+            xtl, ytl, xbr, ybr = pose.bbox_2d_padded
 
-            x, y = normalize_bbox(x, y)
+            xtl, ytl = normalize_bbox(xtl, ytl)
+            xbr, ybr = normalize_bbox(xbr, ybr)
 
-            x2 = x + width
-            y2 = y + height
-
-            x2, y2 = normalize_bbox(x2, y2)
-
-            image_node.append(get_box_node(LABEL_MAP[1], x, y, x2, y2))
+            image_node.append(get_box_node(LABEL_MAP[1], xtl, ytl, xbr, ybr))
 
         xml_root.append(image_node)
         print(f'\r▸"Annotation seq_{n_seq} progress: {100 * (frame_number / (n_frames - 1)):6.2f}%', end='')

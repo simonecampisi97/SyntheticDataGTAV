@@ -81,20 +81,15 @@ def visualize(in_mp4_file_path, xml_file_path, out_mp4_file_path, hide, plot_bbo
     for frame_number, image in enumerate(reader):
 
         for det in detections_by_frame[frame_number]:
-
             # select pose color base on its unique identifier
             color = colors[int(25) % len(colors)]
 
             # draw pose on image
+            bbox = np.array(det.points).astype(int)
 
-            if plot_bbox:
-                # bbox = np.array(pose.bbox_2d_padded).astype(int)
+            xtl, ytl, xbr, ybr = bbox
 
-                bbox = np.array(det.points).astype(int)
-                image = cv2.rectangle(image, (bbox[0], bbox[1]), (bbox[2], bbox[3]), color, 2)
-
-            else:
-                pass  # image = pose.draw(image=image, color=color)
+            image = cv2.rectangle(image, (xtl, ytl), (xbr, ybr), color, 2)
 
         writer.append_data(np.vstack([image, image[-8:, :]]))
         print(f'\r▸ progress: {100 * (frame_number / 1800):6.2f}%', end='')
@@ -110,5 +105,4 @@ if __name__ == '__main__':
         visualize(in_mp4_file_path=os.path.join(seq_path, f"seq_{j}.mp4"),
                   xml_file_path=os.path.join(seq_path, f"seq_{j}_CVAT.xml"),
                   out_mp4_file_path=os.path.join(seq_path, f"res_seq_{j}_cvat.mp4"), hide=True, plot_bbox=True)
-
 

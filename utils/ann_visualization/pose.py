@@ -88,18 +88,16 @@ class Pose(list):
     @property
     def bbox_2d(self):
         # type: () -> List[int]
-        """
-		:return: bounding box around the pose in format [x_min, y_min, width, height]
+        """ bounding box around the pose in format [x_min, y_min, width, height]
 			- x_min = x of the top left corner of the bounding box
-			- y_min = y of the top left corner of the bounding box
-		"""
-        x_min = int(np.min([j.x2d for j in self]))
-        y_min = int(np.min([j.y2d for j in self]))
-        x_max = int(np.max([j.x2d for j in self]))
-        y_max = int(np.max([j.y2d for j in self]))
-        width = x_max - x_min
-        height = y_max - y_min
-        return [x_min, y_min, width, height]
+			- y_min = y of the top left corner of the bounding box """
+
+        x_tl = int(np.min([j.x2d for j in self]))
+        y_tl = int(np.min([j.y2d for j in self]))
+        x_br = int(np.max([j.x2d for j in self]))
+        y_br = int(np.max([j.y2d for j in self]))
+
+        return [x_tl, y_tl, x_br, y_br]
 
     @property
     def bbox_2d_padded(self, h_inc_perc=0.15, w_inc_perc=0.1):
@@ -119,10 +117,10 @@ class Pose(list):
         y_min = y_min - inc_h
         y_max = y_max + inc_h
 
-        width = x_max - x_min
-        height = y_max - y_min
+        #width = x_max - x_min
+        #height = y_max - y_min
 
-        return [x_min, y_min, width, height]
+        return [x_min, y_min, x_max, y_max]
 
     @property
     def coco_annotation(self):
@@ -151,6 +149,11 @@ class Pose(list):
             'bbox': self.bbox_2d
         }
         return annotation
+
+    def handle_joints_not_on_screen(self):
+        for j in self:
+            if not j.is_on_screen:
+                j.occ = True
 
     def draw(self, image, color):
         # type: (np.ndarray, List[int]) -> np.ndarray
